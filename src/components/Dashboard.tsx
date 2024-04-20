@@ -2,29 +2,23 @@
 
 import { trpc } from "@/app/_trpc/client";
 import UploadButton from "./UploadButton";
-import {
-  Expand,
-  Ghost,
-  Loader2,
-  MessageSquare,
-  Plus,
-  Trash,
-} from "lucide-react";
+import { Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
-import { format } from "date-fns";
 import Link from "next/link";
+import { format } from "date-fns";
 import { Button } from "./ui/button";
-
-import "react-loading-skeleton/dist/skeleton.css";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { getUserSubscriptionPlan } from "@/lib/stripe";
 
-const Dashboard = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface PageProps {
+  subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>;
+}
 
+const Dashboard = ({ subscriptionPlan }: PageProps) => {
   const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
     string | null
   >(null);
+
   const utils = trpc.useContext();
 
   const { data: files, isLoading } = trpc.getUserFiles.useQuery();
@@ -46,8 +40,10 @@ const Dashboard = () => {
       <div className="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0">
         <h1 className="mb-3 font-bold text-5xl text-gray-900">My Files</h1>
 
-        <UploadButton isSubscribed />
+        <UploadButton isSubscribed={subscriptionPlan.isSubscribed} />
       </div>
+
+      {/* display all user files */}
       {files && files?.length !== 0 ? (
         <ul className="mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3">
           {files
@@ -88,57 +84,8 @@ const Dashboard = () => {
                     mocked
                   </div>
 
-                  <Dialog
-                    open={isOpen}
-                    onOpenChange={(v) => {
-                      if (!v) {
-                        setIsOpen(v);
-                      }
-                    }}
-                  >
-                    <DialogTrigger onClick={() => setIsOpen(true)} asChild>
-                      <Button
-                        // onClick={() => {}} //deleteFile({ id: file.id })
-                        size="sm"
-                        className="w-full"
-                        variant="destructive"
-                      >
-                        {currentlyDeletingFile === file.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Trash className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <div className="flex flex-col gap-4 ">
-                        <h2 className="text-lg font-semibold text-zinc-900">
-                          Are you sure you want to delete this file?
-                        </h2>
-                        <div className="flex gap-4 items-end justify-end">
-                          <Button
-                            onClick={() => setIsOpen(false)}
-                            variant="ghost"
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={() => deleteFile({ id: file.id })}
-                            variant="destructive"
-                          >
-                            {currentlyDeletingFile === file.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              "Delete"
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* <Button
-                    onClick={() => {}} //deleteFile({ id: file.id })
+                  <Button
+                    onClick={() => deleteFile({ id: file.id })}
                     size="sm"
                     className="w-full"
                     variant="destructive"
@@ -148,7 +95,7 @@ const Dashboard = () => {
                     ) : (
                       <Trash className="h-4 w-4" />
                     )}
-                  </Button> */}
+                  </Button>
                 </div>
               </li>
             ))}
