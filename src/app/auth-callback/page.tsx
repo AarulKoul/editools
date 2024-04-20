@@ -22,7 +22,7 @@ const Page = () => {
           : "/dashboard"
       );
     }
-  }, [data, isLoading]);
+  }, [data, isLoading, error?.data?.code, origin, router]);
 
   return (
     <div className="w-full mt-24 flex justify-center">
