@@ -79,8 +79,8 @@ const Dashboard = ({ subscriptionPlan }: PageProps) => {
                     {format(new Date(file.createdAt), "MMM yyyy")}
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-white">
+                    <MessageSquare className="h-4 w-4 text-white" />
                     mocked
                   </div>
 

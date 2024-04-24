@@ -25,13 +25,16 @@ const ChatInput = ({ isDisabled }: ChatInputProps) => {
                 maxRows={4}
                 ref={textareaRef}
                 autoFocus
+                required
                 onChange={handleInputChange}
                 value={message}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    addMessage();
-                    textareaRef.current?.focus();
+                    if (message.trim()) {
+                      addMessage();
+                      textareaRef.current?.focus();
+                    }
                   }
                 }}
                 placeholder="Enter your question..."
@@ -43,8 +46,10 @@ const ChatInput = ({ isDisabled }: ChatInputProps) => {
                 className="absolute bottom-1.5 right-[8px]"
                 aria-label="send message"
                 onClick={() => {
-                  addMessage();
-                  textareaRef.current?.focus();
+                  if (message.trim()) {
+                    addMessage();
+                    textareaRef.current?.focus();
+                  }
                 }}
               >
                 <Send className="h-4 w-4" />

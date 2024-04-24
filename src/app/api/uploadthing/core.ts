@@ -70,14 +70,7 @@ const onUploadComplete = async ({
       pagesAmt > PLANS.find((plan) => plan.name === "Free")!.pagesPerPdf;
 
     if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
-      await db.file.update({
-        data: {
-          uploadStatus: "FAILED",
-        },
-        where: {
-          id: createdFile.id,
-        },
-      });
+      throw new UploadThingError("File is too large");
     }
 
     const pineconeIndex = pinecone.Index("edit");
@@ -90,7 +83,6 @@ const onUploadComplete = async ({
       pineconeIndex,
       namespace: createdFile.id,
     });
-
     await db.file.update({
       data: {
         uploadStatus: "SUCCESS",

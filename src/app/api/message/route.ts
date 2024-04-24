@@ -70,7 +70,7 @@ export const POST = async (req: NextRequest) => {
   const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     temperature: 0,
-    stream: true,
+    stream: false,
     messages: [
       {
         role: "system",
@@ -99,18 +99,29 @@ export const POST = async (req: NextRequest) => {
     ],
   });
 
-  const stream = OpenAIStream(response, {
-    async onCompletion(completion) {
-      await db.message.create({
-        data: {
-          text: completion,
-          isUserMessage: false,
-          fileId,
-          userId,
-        },
-      });
+  // const stream = OpenAIStream(response, {
+  //   async onCompletion(completion) {
+  //     await db.message.create({
+  //       data: {
+  //         text: completion,
+  //         isUserMessage: false,
+  //         fileId,
+  //         userId,
+  //       },
+  //     });
+  //   },
+  // });
+
+  // return new StreamingTextResponse(stream);
+
+  await db.message.create({
+    data: {
+      text: response.choices[0].message.content!,
+      isUserMessage: false,
+      fileId,
+      userId,
     },
   });
 
-  return new StreamingTextResponse(stream);
+  return new Response(response.choices[0].message.content, { status: 200 });
 };
